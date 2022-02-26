@@ -1,0 +1,29 @@
+{
+  "slug": "NB",
+  "name": "NB",
+  "version": "0.1",
+  "license": "GPL-3.0-or-later",
+  "brand": "NB",
+  "author": "Nils Brederlow",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "simpleOSCvarSaw",
+      "name": "simpleOSCvarSaw",
+      "description": "",
+      "tags": []
+    },
+    {
+      "slug": "simpleStereoEcho",
+      "name": "simpleStereoEcho",
+      "description": "",
+      "tags": []
+    }
+  ]
+}
