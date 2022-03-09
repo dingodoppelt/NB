@@ -36,7 +36,7 @@ public:
 private:
     std::vector<float> delayBuffer;
     long unsigned int index = 0;
-    long unsigned int outdex = 0;
+    long unsigned int outdex = 1;
 };
 
 #endif // DELAYBUFFER_H

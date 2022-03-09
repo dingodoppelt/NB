@@ -45,18 +45,20 @@ struct SimpleStereoEcho : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-        delayBufferL.setDelay(params[TIMEL_PARAM].getValue() * (SR / 1000));
-        delayBufferR.setDelay(params[TIMER_PARAM].getValue() * (SR / 1000));
-        fdbkL = params[FDBKL_PARAM].getValue();
-        fdbkR = params[FDBKR_PARAM].getValue();
         mix = params[MIX_PARAM].getValue();
         in = inputs[INPUTM_INPUT].getVoltage();
-        left = delayBufferL.get();
-        right = delayBufferR.get();
-		outputs[OUTL_OUTPUT].setVoltage(in + (mix * left));
-		outputs[OUTR_OUTPUT].setVoltage(in + (mix * right));
-		delayBufferL.put(in + (fdbkL * left));
-		delayBufferR.put(in + (fdbkR * right));
+        if (mix > 0) {
+            delayBufferL.setDelay(params[TIMEL_PARAM].getValue() * (SR / 1000));
+            delayBufferR.setDelay(params[TIMER_PARAM].getValue() * (SR / 1000));
+            fdbkL = params[FDBKL_PARAM].getValue();
+            fdbkR = params[FDBKR_PARAM].getValue();
+            left = delayBufferL.get();
+            right = delayBufferR.get();
+            delayBufferL.put(in + (fdbkL * left));
+            delayBufferR.put(in + (fdbkR * right));
+        }
+        outputs[OUTL_OUTPUT].setVoltage(in + (mix * left));
+        outputs[OUTR_OUTPUT].setVoltage(in + (mix * right));
 		delayBufferL.tick();
         delayBufferR.tick();
 	}
