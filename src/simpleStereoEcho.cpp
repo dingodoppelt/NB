@@ -48,8 +48,8 @@ struct SimpleStereoEcho : Module {
         mix = params[MIX_PARAM].getValue();
         in = inputs[INPUTM_INPUT].getVoltage();
         if (mix > 0) {
-            delayBufferL.setDelay(params[TIMEL_PARAM].getValue() * (SR / 1000));
-            delayBufferR.setDelay(params[TIMER_PARAM].getValue() * (SR / 1000));
+            delayBufferL.setDelay((long unsigned int)(params[TIMEL_PARAM].getValue() * (SR / 1000)) + 1);
+            delayBufferR.setDelay((long unsigned int)(params[TIMER_PARAM].getValue() * (SR / 1000)) + 1);
             fdbkL = params[FDBKL_PARAM].getValue();
             fdbkR = params[FDBKR_PARAM].getValue();
             left = delayBufferL.get();

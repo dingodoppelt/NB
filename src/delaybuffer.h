@@ -29,14 +29,14 @@ class DelayBuffer
 public:
     DelayBuffer() {};
     void setSize(long unsigned int size) { delayBuffer.resize(size); };
-    void setDelay(float delay) { outdex = (long unsigned int)(index - delay + delayBuffer.size()) % delayBuffer.size(); };
+    void setDelay(long unsigned int delay) { outdex = (index - delay + delayBuffer.size()) % delayBuffer.size(); };
     void put(float sample) { delayBuffer[index] = sample; };
     float get() { return delayBuffer[outdex]; };
-    void tick() { index++; outdex++; if(index >= delayBuffer.size()) index = 0; if(outdex >= delayBuffer.size()) outdex = 0; };
+    //void tick() { index++; outdex++; if(index >= delayBuffer.size()) index = 0; if(outdex >= delayBuffer.size()) outdex = 0; };
+    void tick() { if (!(++index < delayBuffer.size())) index = 0; if (!(++outdex < delayBuffer.size())) outdex = 0;};
 private:
     std::vector<float> delayBuffer;
-    long unsigned int index = 0;
-    long unsigned int outdex = 1;
+    long unsigned int index, outdex;
 };
 
 #endif // DELAYBUFFER_H
