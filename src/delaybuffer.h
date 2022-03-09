@@ -28,7 +28,7 @@ class DelayBuffer
 {
 public:
     DelayBuffer() {};
-    void resize(long unsigned int size) { delayBuffer.resize(size); };
+    void setSize(long unsigned int size) { delayBuffer.resize(size); };
     void setDelay(float delay) { outdex = (long unsigned int)(index - delay + delayBuffer.size()) % delayBuffer.size(); };
     void put(float sample) { delayBuffer[index] = sample; };
     float get() { return delayBuffer[outdex]; };

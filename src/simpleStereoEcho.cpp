@@ -40,8 +40,8 @@ struct SimpleStereoEcho : Module {
 		configInput(INPUTM_INPUT, "mono input signal");
 		configOutput(OUTL_OUTPUT, "left output channel");
 		configOutput(OUTR_OUTPUT, "right output channel");
-		delayBufferL.resize(APP->engine->getSampleRate() * 5);
-		delayBufferR.resize(APP->engine->getSampleRate() * 5);
+		delayBufferL.setSize(SR * 5);
+		delayBufferR.setSize(SR * 5);
 	}
 
 	void process(const ProcessArgs& args) override {
