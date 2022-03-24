@@ -32,7 +32,6 @@ public:
     void setDelay(long unsigned int delay) { outdex = (index - delay + delayBuffer.size()) % delayBuffer.size(); };
     void put(float sample) { delayBuffer[index] = sample; };
     float get() { return delayBuffer[outdex]; };
-    //void tick() { index++; outdex++; if(index >= delayBuffer.size()) index = 0; if(outdex >= delayBuffer.size()) outdex = 0; };
     void tick() { if (!(++index < delayBuffer.size())) index = 0; if (!(++outdex < delayBuffer.size())) outdex = 0;};
 private:
     std::vector<float> delayBuffer;
