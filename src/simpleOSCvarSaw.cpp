@@ -23,13 +23,18 @@ struct SimpleOSCvarSaw : Module {
 	enum LightId {
 		LIGHTS_LEN
 	};
+    
+    float getVoicingRatio(int noteNum) {
+        float ratio = (440.0 * powf(2.0, (float)(noteNum - 69) / 12)) / (440.0 * powf(2.0, (float)(12 - 69) / 12));
+        return ratio;
+    }
 
     VariableSawOscillator osc[4];
     float freq = 440.f;
     float out, aft, tune, bendfactor, transp, spread = 0.f;
     float bendrange = 2.f;
     float octave = 1.f;
-    float voicing[4] = {1.f,  0.749153538438f, 0.561231024154f, 0.5f};
+    float voicing[2][4] = { {1.f,  0.749153538438f, 0.561231024154f, 0.5f}, {1.f, getVoicingRatio(8), getVoicingRatio(3), getVoicingRatio(1)} };
 
 	SimpleOSCvarSaw() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -57,7 +62,7 @@ struct SimpleOSCvarSaw : Module {
         transp = powf(2.f, params[TRANSP_PARAM].getValue() / 12.f);
         spread = params[UNISONSPREAD_PARAM].getValue();
         for(int i = 0; i < 4; i++) {
-            osc[i].SetFreq(freq * powf(2.f, (spread * i) / 50.f) * (bendfactor < 0.9f ? voicing[i] : bendfactor));
+            osc[i].SetFreq(freq * powf(2.f, (spread * i) / 50.f) * (bendfactor < 0.9f ? voicing[1][i] : bendfactor));
             osc[i].SetPW(aft / 2.f + 0.5f);
             out += osc[i].Process();
         }
