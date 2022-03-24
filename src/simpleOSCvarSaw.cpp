@@ -4,6 +4,7 @@
 struct SimpleOSCvarSaw : Module {
 	enum ParamId {
 		TRANSP_PARAM,
+		VOICINGSEL_PARAM,
 		OCTAVE_PARAM,
 		TUNE_PARAM,
 		UNISONSPREAD_PARAM,
@@ -23,8 +24,8 @@ struct SimpleOSCvarSaw : Module {
 	enum LightId {
 		LIGHTS_LEN
 	};
-    
-    float getVoicingRatio(int noteNum) {
+
+	float getVoicingRatio(int noteNum) {
         float ratio = (440.0 * powf(2.0, (float)(noteNum - 69) / 12)) / (440.0 * powf(2.0, (float)(12 - 69) / 12));
         return ratio;
     }
@@ -34,11 +35,16 @@ struct SimpleOSCvarSaw : Module {
     float out, aft, tune, bendfactor, transp, spread = 0.f;
     float bendrange = 2.f;
     float octave = 1.f;
-    float voicing[2][4] = { {1.f,  0.749153538438f, 0.561231024154f, 0.5f}, {1.f, getVoicingRatio(8), getVoicingRatio(3), getVoicingRatio(1)} };
+    float voicing[5][4] = { {1.f, getVoicingRatio(7), getVoicingRatio(2), getVoicingRatio(0)},
+                            {1.f, getVoicingRatio(8), getVoicingRatio(3), getVoicingRatio(1)},
+                            {1.f, getVoicingRatio(9), getVoicingRatio(4), getVoicingRatio(1)},
+                            {1.f, getVoicingRatio(9), getVoicingRatio(6), getVoicingRatio(3)},
+                            {1.f, getVoicingRatio(8), getVoicingRatio(4), getVoicingRatio(0)} };
 
 	SimpleOSCvarSaw() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configParam(TRANSP_PARAM, -6.f, 6.f, 0.f, "transpose by semitones");
+		configParam(VOICINGSEL_PARAM, 0.f, 4.f, 1.f, "select voicing");
 		configParam(OCTAVE_PARAM, -2.f, 2.f, 0.f, "transpose by octave");
 		configParam(TUNE_PARAM, -0.1f, 0.1f, 0.f, "master tune offset");
 		configParam(UNISONSPREAD_PARAM, 0.f, 1.0f, 0.f, "detune spread");
@@ -62,14 +68,13 @@ struct SimpleOSCvarSaw : Module {
         transp = powf(2.f, params[TRANSP_PARAM].getValue() / 12.f);
         spread = params[UNISONSPREAD_PARAM].getValue();
         for(int i = 0; i < 4; i++) {
-            osc[i].SetFreq(freq * powf(2.f, (spread * i) / 50.f) * (bendfactor < 0.9f ? voicing[1][i] : bendfactor));
+            osc[i].SetFreq(freq * powf(2.f, (spread * i) / 50.f) * (bendfactor < 0.9f ? voicing[(int)(params[VOICINGSEL_PARAM].getValue())][i] : bendfactor));
             osc[i].SetPW(aft / 2.f + 0.5f);
             out += osc[i].Process();
         }
         outputs[OUTPORT_OUTPUT].setVoltage(aft * aft * tanh(out));
 	}
 };
-
 
 struct SimpleOSCvarSawWidget : ModuleWidget {
 	SimpleOSCvarSawWidget(SimpleOSCvarSaw* module) {
@@ -82,6 +87,7 @@ struct SimpleOSCvarSawWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(9.071, 27.697)), module, SimpleOSCvarSaw::TRANSP_PARAM));
+		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(20.32, 27.697)), module, SimpleOSCvarSaw::VOICINGSEL_PARAM));
 		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(32.084, 27.697)), module, SimpleOSCvarSaw::OCTAVE_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(32.084, 47.473)), module, SimpleOSCvarSaw::TUNE_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(32.084, 67.249)), module, SimpleOSCvarSaw::UNISONSPREAD_PARAM));
@@ -91,7 +97,7 @@ struct SimpleOSCvarSawWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(9.071, 87.024)), module, SimpleOSCvarSaw::PWIN_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(32.084, 87.024)), module, SimpleOSCvarSaw::MWIN_INPUT));
 
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(29.766, 111.986)), module, SimpleOSCvarSaw::OUTPORT_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(20.32, 108.773)), module, SimpleOSCvarSaw::OUTPORT_OUTPUT));
 	}
 };
 
