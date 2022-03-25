@@ -1,6 +1,6 @@
 /*
- * <one line to give the program's name and a brief idea of what it does.>
- * Copyright (C) 2022  <copyright holder> <email>
+ * Simplest Ringbuffer
+ * Copyright (C) 2022  Nils Brederlow
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@ public:
     void setDelay(long unsigned int delay) { outdex = (index - delay + delayBuffer.size()) % delayBuffer.size(); };
     void put(float sample) { delayBuffer[index] = sample; };
     float get() { return delayBuffer[outdex]; };
-    //void tick() { index++; outdex++; if(index >= delayBuffer.size()) index = 0; if(outdex >= delayBuffer.size()) outdex = 0; };
     void tick() { if (!(++index < delayBuffer.size())) index = 0; if (!(++outdex < delayBuffer.size())) outdex = 0;};
 private:
     std::vector<float> delayBuffer;
