@@ -35,16 +35,17 @@ struct SimpleOSCvarSaw : Module {
     float out, aft, tune, bendfactor, transp, spread = 0.f;
     float bendrange = 2.f;
     float octave = 1.f;
-    float voicing[5][4] = { {1.f, getVoicingRatio(7), getVoicingRatio(2), getVoicingRatio(0)},
+    float voicing[6][4] = { {1.f, getVoicingRatio(7), getVoicingRatio(2), getVoicingRatio(0)},
                             {1.f, getVoicingRatio(8), getVoicingRatio(3), getVoicingRatio(1)},
                             {1.f, getVoicingRatio(9), getVoicingRatio(4), getVoicingRatio(1)},
+                            {1.f, getVoicingRatio(7), getVoicingRatio(5), getVoicingRatio(1)},
                             {1.f, getVoicingRatio(9), getVoicingRatio(6), getVoicingRatio(3)},
                             {1.f, getVoicingRatio(8), getVoicingRatio(4), getVoicingRatio(0)} };
 
 	SimpleOSCvarSaw() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configParam(TRANSP_PARAM, -6.f, 6.f, 0.f, "transpose by semitones");
-		configParam(VOICINGSEL_PARAM, 0.f, 4.f, 1.f, "select voicing");
+		configParam(VOICINGSEL_PARAM, 0.f, 5.f, 1.f, "select voicing");
 		configParam(OCTAVE_PARAM, -2.f, 2.f, 0.f, "transpose by octave");
 		configParam(TUNE_PARAM, -0.1f, 0.1f, 0.f, "master tune offset");
 		configParam(UNISONSPREAD_PARAM, 0.f, 1.0f, 0.f, "detune spread");
