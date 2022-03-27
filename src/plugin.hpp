@@ -11,3 +11,4 @@ extern Plugin* pluginInstance;
 // extern Model* modelMyModule;
 extern Model* modelSimpleStereoEcho;
 extern Model* modelSimpleOSCvarSaw;
+extern Model* modelSoftclip;

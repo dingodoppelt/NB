@@ -24,6 +24,16 @@
       "name": "simpleStereoEcho",
       "description": "",
       "tags": []
+    },
+    {
+      "slug": "softclip",
+      "name": "softclip",
+      "description": "",
+      "tags": [
+        "Waveshaper",
+        "Distortion",
+        "Effect"
+      ]
     }
   ]
 }
