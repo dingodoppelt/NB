@@ -88,7 +88,7 @@ struct SimpleOSCvarSaw : Module {
         transp = powf(2.f, params[TRANSP_PARAM].getValue() / 12.f);
         spread = params[UNISONSPREAD_PARAM].getValue();
         for(int i = 0; i < 4; i++) {
-            osc[i].SetFreq(freq * powf(2.f, (spread * i) / 50.f) * (bendfactor < 0.9f ? voicing[(int)(params[VOICINGSEL_PARAM].getValue())][i] : bendfactor));
+            osc[i].SetFreq(freq * (bendfactor < 0.99f ? voicing[(int)(params[VOICINGSEL_PARAM].getValue())][i] : bendfactor * powf(2.f, (spread * i) / 50.f) ));
             osc[i].SetPW(aft / 2.f + 0.5f);
             out += osc[i].Process();
         }
