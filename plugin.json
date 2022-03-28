@@ -17,13 +17,19 @@
       "slug": "simpleOSCvarSaw",
       "name": "simpleOSCvarSaw",
       "description": "",
-      "tags": []
+      "tags": [
+        "Oscillator"
+      ]
     },
     {
       "slug": "simpleStereoEcho",
       "name": "simpleStereoEcho",
       "description": "",
-      "tags": []
+      "tags": [
+        "Delay",
+        "Digital",
+        "Effect"
+      ]
     },
     {
       "slug": "softclip",
