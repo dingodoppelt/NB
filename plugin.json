@@ -16,7 +16,7 @@
     {
       "slug": "simpleOSCvarSaw",
       "name": "simpleOSCvarSaw",
-      "description": "",
+      "description": "osc with morphing waveform (tri-saw)",
       "tags": [
         "Oscillator"
       ]
@@ -24,7 +24,7 @@
     {
       "slug": "simpleStereoEcho",
       "name": "simpleStereoEcho",
-      "description": "",
+      "description": "simple stereo echo",
       "tags": [
         "Delay",
         "Digital",
@@ -34,7 +34,7 @@
     {
       "slug": "softclip",
       "name": "softclip",
-      "description": "",
+      "description": "soft tanh clipping with hardness control",
       "tags": [
         "Waveshaper",
         "Distortion",
