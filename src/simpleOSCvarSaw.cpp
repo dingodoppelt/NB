@@ -27,13 +27,14 @@ struct SimpleOSCvarSaw : Module {
 		OCTAVE_PARAM,
 		TUNE_PARAM,
 		UNISONSPREAD_PARAM,
+		PWMAMT_PARAM,
 		PARAMS_LEN
 	};
 	enum InputId {
 		OCTCVIN_INPUT,
 		AFTIN_INPUT,
 		PWIN_INPUT,
-		MWIN_INPUT,
+		// MWIN_INPUT,
 		INPUTS_LEN
 	};
 	enum OutputId {
@@ -68,10 +69,11 @@ struct SimpleOSCvarSaw : Module {
 		configParam(OCTAVE_PARAM, -2.f, 2.f, 0.f, "transpose by octave");
 		configParam(TUNE_PARAM, -0.1f, 0.1f, 0.f, "master tune offset");
 		configParam(UNISONSPREAD_PARAM, 0.f, 1.0f, 0.f, "detune spread");
+		configParam(PWMAMT_PARAM, -1.f, 1.0f, 0.f, "pwm amount");
 		configInput(OCTCVIN_INPUT, "frequency input");
 		configInput(AFTIN_INPUT, "aftertouch/breath controller input");
 		configInput(PWIN_INPUT, "pitch wheel/bend sensor input");
-		configInput(MWIN_INPUT, "mod wheel/bite sensor input (NOT IMPLEMENTED)");
+		// configInput(MWIN_INPUT, "mod wheel/bite sensor input (NOT IMPLEMENTED)");
 		configOutput(OUTPORT_OUTPUT, "output port");
         for (int i=0; i<4; i++){
             osc[i].Init(APP->engine->getSampleRate());
@@ -79,20 +81,24 @@ struct SimpleOSCvarSaw : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-        out = 0;
-        freq = dsp::FREQ_C4 * powf(2.f, inputs[OCTCVIN_INPUT].getVoltage()) * octave * transp * tune;
-        aft = inputs[AFTIN_INPUT].getVoltage() / 10.f;
-        tune = powf(2.f, params[TUNE_PARAM].getValue());
-        octave = powf(2.f, params[OCTAVE_PARAM].getValue());
-        bendfactor = powf(2.f, ((inputs[PWIN_INPUT].getVoltage() / 5.f) * bendrange) / 12.f);
-        transp = powf(2.f, params[TRANSP_PARAM].getValue() / 12.f);
-        spread = params[UNISONSPREAD_PARAM].getValue();
-        for(int i = 0; i < 4; i++) {
-            osc[i].SetFreq(freq * (bendfactor < 0.99f ? voicing[(int)(params[VOICINGSEL_PARAM].getValue())][i] : bendfactor * powf(2.f, (spread * i) / 50.f) ));
-            osc[i].SetPW(aft / 2.f + 0.5f);
-            out += osc[i].Process();
+        if (outputs[OUTPORT_OUTPUT].isConnected()) {
+            out = 0;
+            freq = dsp::FREQ_C4 * powf(2.f, inputs[OCTCVIN_INPUT].getVoltage()) * octave * transp * tune;
+            aft = inputs[AFTIN_INPUT].isConnected() ? (inputs[AFTIN_INPUT].getVoltage() / 10.f) : params[PWMAMT_PARAM].getValue();
+            tune = powf(2.f, params[TUNE_PARAM].getValue());
+            octave = powf(2.f, params[OCTAVE_PARAM].getValue());
+            bendfactor = powf(2.f, ((inputs[PWIN_INPUT].getVoltage() / 5.f) * bendrange) / 12.f);
+            transp = powf(2.f, params[TRANSP_PARAM].getValue() / 12.f);
+            spread = params[UNISONSPREAD_PARAM].getValue();
+            for(int i = 0; i < 4; i++) {
+                osc[i].SetFreq(freq * (bendfactor < 0.99f ? voicing[(int)(params[VOICINGSEL_PARAM].getValue())][i] : bendfactor * powf(2.f, (spread * i) / 50.f) ));
+                osc[i].SetPW(aft / 2.f + 0.5f);
+                out += osc[i].Process();
+            }
+            outputs[OUTPORT_OUTPUT].setVoltage(5.f * out);
+        } else {
+            outputs[OUTPORT_OUTPUT].setVoltage(0.f);
         }
-        outputs[OUTPORT_OUTPUT].setVoltage(5.f * out);
 	}
 };
 
@@ -111,11 +117,12 @@ struct SimpleOSCvarSawWidget : ModuleWidget {
 		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(32.084, 27.697)), module, SimpleOSCvarSaw::OCTAVE_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(32.084, 47.473)), module, SimpleOSCvarSaw::TUNE_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(32.084, 67.249)), module, SimpleOSCvarSaw::UNISONSPREAD_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(20.32, 67.249)), module, SimpleOSCvarSaw::PWMAMT_PARAM));
 
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(9.071, 47.473)), module, SimpleOSCvarSaw::OCTCVIN_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(9.071, 67.249)), module, SimpleOSCvarSaw::AFTIN_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(9.071, 87.024)), module, SimpleOSCvarSaw::PWIN_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(32.084, 87.024)), module, SimpleOSCvarSaw::MWIN_INPUT));
+		// addInput(createInputCentered<PJ301MPort>(mm2px(Vec(32.084, 87.024)), module, SimpleOSCvarSaw::MWIN_INPUT));
 
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(20.32, 108.773)), module, SimpleOSCvarSaw::OUTPORT_OUTPUT));
 	}

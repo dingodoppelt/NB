@@ -64,22 +64,24 @@ struct SimpleStereoEcho : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-        mix = params[MIX_PARAM].getValue();
-        in = inputs[INPUTM_INPUT].getVoltage();
-        if (mix > 0) {
-            delayBufferL.setDelay((long unsigned int)(params[TIMEL_PARAM].getValue() * (SR / 1000)) + 1);
-            delayBufferR.setDelay((long unsigned int)(params[TIMER_PARAM].getValue() * (SR / 1000)) + 1);
-            fdbkL = params[FDBKL_PARAM].getValue();
-            fdbkR = params[FDBKR_PARAM].getValue();
-            left = delayBufferL.get();
-            right = delayBufferR.get();
-            delayBufferL.put(in + (fdbkL * left));
-            delayBufferR.put(in + (fdbkR * right));
+        if (outputs[OUTL_OUTPUT].isConnected() || outputs[OUTR_OUTPUT].isConnected()) {
+            mix = inputs[MIXCV_INPUT].isConnected() ? (inputs[MIXCV_INPUT].getVoltage() / 10.f) : params[MIX_PARAM].getValue();
+            in = inputs[INPUTM_INPUT].getVoltage();
+            if (mix > 0) {
+                delayBufferL.setDelay((long unsigned int)(params[TIMEL_PARAM].getValue() * (SR / 1000)) + 1);
+                delayBufferR.setDelay((long unsigned int)(params[TIMER_PARAM].getValue() * (SR / 1000)) + 1);
+                fdbkL = params[FDBKL_PARAM].getValue();
+                fdbkR = params[FDBKR_PARAM].getValue();
+                left = delayBufferL.get();
+                right = delayBufferR.get();
+                delayBufferL.put(in + (fdbkL * left));
+                delayBufferR.put(in + (fdbkR * right));
+            }
+            outputs[OUTL_OUTPUT].setVoltage(in + (mix * left));
+            outputs[OUTR_OUTPUT].setVoltage(in + (mix * right));
+            delayBufferL.tick();
+            delayBufferR.tick();
         }
-        outputs[OUTL_OUTPUT].setVoltage(in + (mix * left));
-        outputs[OUTR_OUTPUT].setVoltage(in + (mix * right));
-		delayBufferL.tick();
-        delayBufferR.tick();
 	}
 };
 
