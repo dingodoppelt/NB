@@ -40,6 +40,14 @@
         "Distortion",
         "Effect"
       ]
+    },
+    {
+      "slug": "varShapeOSC",
+      "name": "varShapeOSC",
+      "description": "variable shape oscillator",
+      "tags": [
+        "Oscillator"
+      ]
     }
   ]
 }
