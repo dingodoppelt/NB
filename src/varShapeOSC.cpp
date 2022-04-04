@@ -7,14 +7,15 @@ struct VarShapeOSC : Module {
 	enum ParamId {
 		TRANSP_PARAM,
 		TUNE_PARAM,
-		DETUNE_PARAM,
 		OCT_PARAM,
+		DETUNE_PARAM,
 		AFT_PARAM,
 		VOICING_PARAM,
 		PARAMS_LEN
 	};
 	enum InputId {
 		VOCT_INPUT,
+		OCTCVIN_INPUT,
 		AFTIN_INPUT,
 		PW_INPUT,
 		VOICINGCV_INPUT,
@@ -96,15 +97,15 @@ struct VarShapeOSC : Module {
 
 	void process(const ProcessArgs& args) override {
         if (outputs[OUTSQR_OUTPUT].isConnected() || outputs[OUTSAW_OUTPUT].isConnected()) {
-            outSqr = outSaw = 0;
+            outSqr = outSaw = 0.f;
             aft = inputs[AFTIN_INPUT].isConnected() ? powf(inputs[AFTIN_INPUT].getVoltage() / 10.f, 2) : params[AFT_PARAM].getValue();
             tune = powf(2.f, params[TUNE_PARAM].getValue());
-            octave = powf(2.f, params[OCT_PARAM].getValue());
+            octave = inputs[OCTCVIN_INPUT].isConnected() ? powf(2.f, params[OCT_PARAM].getValue() * (int)(inputs[OCTCVIN_INPUT].getVoltage() / 10.f)) : powf(2.f, params[OCT_PARAM].getValue());
             bendfactor = powf(2.f, ((inputs[PW_INPUT].getVoltage() / 5.f) * bendrange) / 12.f);
             transp = powf(2.f, params[TRANSP_PARAM].getValue() / 12.f);
             spread = params[DETUNE_PARAM].getValue();
             freq = dsp::FREQ_C4 * powf(2.f, inputs[VOCT_INPUT].getVoltage()) * octave * transp * tune;
-            voicing_select = inputs[VOICINGCV_INPUT].isConnected() ? (int)((inputs[VOICINGCV_INPUT].getVoltage() + 10.f) / 4) : (int)(params[VOICING_PARAM].getValue());
+            voicing_select = inputs[VOICINGCV_INPUT].isConnected() ? (int)(inputs[VOICINGCV_INPUT].getVoltage() / 10.f ) * 6 : (int)(params[VOICING_PARAM].getValue());
             for(int i = 0; i < 4; i++) {
                 vcosqr[i].osc.SetFreq(freq * (bendfactor < 0.99f ? voicing[voicing_select][i] : bendfactor * (powf(vcosqr[i].detune, powf(spread, 4)))));
                 vcosaw[i].osc.SetFreq(freq * (bendfactor < 0.99f ? voicing[voicing_select][i] : bendfactor * (powf(vcosaw[i].detune, powf(spread, 4)))));
@@ -135,12 +136,13 @@ struct VarShapeOSCWidget : ModuleWidget {
 
 		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(20.176, 28.445)), module, VarShapeOSC::TRANSP_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(33.076, 33.572)), module, VarShapeOSC::TUNE_PARAM));
+		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(20.011, 50.937)), module, VarShapeOSC::OCT_PARAM));
 		addParam(createParamCentered<Trimpot>(mm2px(Vec(32.58, 50.937)), module, VarShapeOSC::DETUNE_PARAM));
-		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(13.727, 52.756)), module, VarShapeOSC::OCT_PARAM));
 		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(31.257, 67.144)), module, VarShapeOSC::AFT_PARAM));
 		addParam(createParamCentered<RoundBlackSnapKnob>(mm2px(Vec(31.203, 87.843)), module, VarShapeOSC::VOICING_PARAM));
 
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.119, 35.887)), module, VarShapeOSC::VOCT_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.781, 50.441)), module, VarShapeOSC::OCTCVIN_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(7.607, 64.498)), module, VarShapeOSC::AFTIN_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(16.485, 81.31)), module, VarShapeOSC::PW_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(18.173, 92.014)), module, VarShapeOSC::VOICINGCV_INPUT));
