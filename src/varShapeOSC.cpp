@@ -105,7 +105,7 @@ struct VarShapeOSC : Module {
             transp = powf(2.f, params[TRANSP_PARAM].getValue() / 12.f);
             spread = params[DETUNE_PARAM].getValue();
             freq = dsp::FREQ_C4 * powf(2.f, inputs[VOCT_INPUT].getVoltage()) * octave * transp * tune;
-            voicing_select = inputs[VOICINGCV_INPUT].isConnected() ? (int)(inputs[VOICINGCV_INPUT].getVoltage() / 10.f ) * 6 : (int)(params[VOICING_PARAM].getValue());
+            voicing_select = inputs[VOICINGCV_INPUT].isConnected() ? (int)(abs(inputs[VOICINGCV_INPUT].getVoltage() * 0.5f)) : (int)(params[VOICING_PARAM].getValue());
             for(int i = 0; i < 4; i++) {
                 vcosqr[i].osc.SetFreq(freq * (bendfactor < 0.99f ? voicing[voicing_select][i] : bendfactor * (powf(vcosqr[i].detune, powf(spread, 4)))));
                 vcosaw[i].osc.SetFreq(freq * (bendfactor < 0.99f ? voicing[voicing_select][i] : bendfactor * (powf(vcosaw[i].detune, powf(spread, 4)))));
