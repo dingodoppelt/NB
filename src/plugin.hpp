@@ -13,3 +13,4 @@ extern Model* modelSimpleStereoEcho;
 extern Model* modelSimpleOSCvarSaw;
 extern Model* modelSoftclip;
 extern Model* modelVarShapeOSC;
+extern Model* modelMoggle;

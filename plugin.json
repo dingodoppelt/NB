@@ -48,6 +48,14 @@
       "tags": [
         "Oscillator"
       ]
+    },
+    {
+      "slug": "Moggle",
+      "name": "Moggle",
+      "description": "cv controlled morphing between two values",
+      "tags": [
+        "Logic"
+      ]
     }
   ]
 }
