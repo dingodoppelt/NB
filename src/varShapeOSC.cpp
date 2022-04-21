@@ -48,9 +48,10 @@ struct VarShapeOSC : Module {
     float octave = 1.f;
     unsigned char ticker = 0x00;
     int voicing_select = 0;
-    float voicing[8][4] = { {1.f, getVoicingRatio(7), getVoicingRatio(2), getVoicingRatio(0)},
-                            {1.f, getVoicingRatio(19), getVoicingRatio(14), getVoicingRatio(4)},
-                            {1.f, getVoicingRatio(6), getVoicingRatio(4), getVoicingRatio(2)},
+    float voicing[9][4] = { {1.f, getVoicingRatio(7), getVoicingRatio(2), getVoicingRatio(0)},
+                            {1.f, getVoicingRatio(7), getVoicingRatio(2), getVoicingRatio(-8)},
+                            {1.f, getVoicingRatio(9), getVoicingRatio(4), getVoicingRatio(-7)},
+                            {1.f, getVoicingRatio(9), getVoicingRatio(5), getVoicingRatio(2)},
                             {1.f, getVoicingRatio(8), getVoicingRatio(3), getVoicingRatio(1)},
                             {1.f, getVoicingRatio(9), getVoicingRatio(4), getVoicingRatio(1)},
                             {1.f, getVoicingRatio(7), getVoicingRatio(5), getVoicingRatio(1)},
@@ -65,7 +66,7 @@ struct VarShapeOSC : Module {
 		configParam(DETUNE_PARAM, 0.f, 1.f, 0.f, "detune spread");
 		configParam(OCT_PARAM, -2.f, 2.f, 0.f, "transpose by octave");
 		configParam(AFT_PARAM, 0.f, 1.f, 0.f, "aftertouch/breath pressure");
-		configParam(VOICING_PARAM, 0.f, 7.f, 0.f, "voicing selection");
+		configParam(VOICING_PARAM, 0.f, 8.f, 0.f, "voicing selection");
 		configInput(VOCT_INPUT, "v/oct");
 		configInput(AFTIN_INPUT, "aftertouch/breath pressure cv in");
 		configInput(PW_INPUT, "pitchwheel/bend sensor cv in");
