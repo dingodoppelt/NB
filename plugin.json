@@ -65,6 +65,15 @@
         "polyphonic",
         "chorus"
       ]
+    },
+    {
+      "slug": "VarTriSaw",
+      "name": "VarTriSaw",
+      "description": "4 voice oscillator square and triangle waveforms with pwm",
+      "tags": [
+        "polyphonic",
+        "oscillator"
+      ]
     }
   ]
 }

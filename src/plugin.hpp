@@ -15,3 +15,4 @@ extern Model* modelSoftclip;
 extern Model* modelVarShapeOSC;
 extern Model* modelMoggle;
 extern Model* modelPolyfotz;
+extern Model* modelVarTriSaw;
