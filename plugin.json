@@ -56,6 +56,15 @@
       "tags": [
         "Logic"
       ]
+    },
+    {
+      "slug": "Polyfotz",
+      "name": "Polyfotz",
+      "description": "Polyphonic 4 voice harmony generator",
+      "tags": [
+        "polyphonic",
+        "chorus"
+      ]
     }
   ]
 }
