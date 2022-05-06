@@ -18,7 +18,6 @@
  */
 
 #include "plugin.hpp"
-#include "delaybuffer.h"
 
 struct SimpleStereoEcho : Module {
 	enum ParamId {
@@ -43,10 +42,10 @@ struct SimpleStereoEcho : Module {
 		LIGHTS_LEN
 	};
 
-	DelayBuffer delayBufferL;
-	DelayBuffer delayBufferR;
-    float fdbkL, fdbkR, mix, in, left, right = 0.f;
-    float SR = APP->engine->getSampleRate();
+    int SR = APP->engine->getSampleRate();
+	rack::dsp::RingBuffer<float, 240000> delayBufferL;
+	rack::dsp::RingBuffer<float, 240000> delayBufferR;
+    float fdbkL, fdbkR, timeL, timeR, mix, in, left, right = 0.f;
 
 	SimpleStereoEcho() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -59,8 +58,6 @@ struct SimpleStereoEcho : Module {
 		configInput(INPUTM_INPUT, "mono input signal");
 		configOutput(OUTL_OUTPUT, "left output channel");
 		configOutput(OUTR_OUTPUT, "right output channel");
-		delayBufferL.setSize(SR * 5);
-		delayBufferR.setSize(SR * 5);
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -68,19 +65,23 @@ struct SimpleStereoEcho : Module {
             mix = inputs[MIXCV_INPUT].isConnected() ? (inputs[MIXCV_INPUT].getVoltage() / 10.f) : params[MIX_PARAM].getValue();
             in = inputs[INPUTM_INPUT].getVoltage();
             if (mix > 0) {
-                delayBufferL.setDelay((long unsigned int)(params[TIMEL_PARAM].getValue() * (SR / 1000)) + 1);
-                delayBufferR.setDelay((long unsigned int)(params[TIMER_PARAM].getValue() * (SR / 1000)) + 1);
+                timeL = params[TIMEL_PARAM].getValue() * (SR / 1000);
+                timeR = params[TIMER_PARAM].getValue() * (SR / 1000);
                 fdbkL = params[FDBKL_PARAM].getValue();
                 fdbkR = params[FDBKR_PARAM].getValue();
-                left = delayBufferL.get();
-                right = delayBufferR.get();
-                delayBufferL.put(in + (fdbkL * left));
-                delayBufferR.put(in + (fdbkR * right));
+                if (delayBufferL.end - delayBufferL.start > timeL) {
+                    delayBufferL.start = delayBufferL.end - timeL;
+                    left = delayBufferL.shift();
+                }
+                if (delayBufferR.end - delayBufferR.start > timeR) {
+                    delayBufferR.start = delayBufferR.end - timeR;
+                    left = delayBufferR.shift();
+                }
+                delayBufferL.push(in + (fdbkL * left));
+                delayBufferR.push(in + (fdbkR * right));
             }
             outputs[OUTL_OUTPUT].setVoltage(in + (mix * left));
             outputs[OUTR_OUTPUT].setVoltage(in + (mix * right));
-            delayBufferL.tick();
-            delayBufferR.tick();
         }
 	}
 };
