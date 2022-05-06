@@ -69,16 +69,14 @@ struct SimpleStereoEcho : Module {
                 timeR = params[TIMER_PARAM].getValue() * (SR / 1000);
                 fdbkL = params[FDBKL_PARAM].getValue();
                 fdbkR = params[FDBKR_PARAM].getValue();
-                if (delayBufferL.end - delayBufferL.start > timeL) {
-                    delayBufferL.start = delayBufferL.end - timeL;
-                    left = delayBufferL.shift();
-                }
-                if (delayBufferR.end - delayBufferR.start > timeR) {
-                    delayBufferR.start = delayBufferR.end - timeR;
-                    left = delayBufferR.shift();
-                }
+                delayBufferL.end = delayBufferL.start + timeL;
+                delayBufferR.end = delayBufferR.start + timeR;
+                left = delayBufferL.shift();
+                right = delayBufferR.shift();
                 delayBufferL.push(in + (fdbkL * left));
                 delayBufferR.push(in + (fdbkR * right));
+            } else {
+                left = right = 0.f;
             }
             outputs[OUTL_OUTPUT].setVoltage(in + (mix * left));
             outputs[OUTR_OUTPUT].setVoltage(in + (mix * right));
