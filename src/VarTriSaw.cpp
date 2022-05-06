@@ -21,7 +21,7 @@ struct VarTriSaw : Module {
 		LIGHTS_LEN
 	};
 
-    VariableShapeOscillator SQRosc, SAWosc;
+    VariableShapeOscillator SQRosc[4], SAWosc[4];
 
 	VarTriSaw() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -29,10 +29,12 @@ struct VarTriSaw : Module {
 		configInput(AFTIN_INPUT, "aftertouch");
 		configOutput(OUTSAW_OUTPUT, "pwm triSaw");
 		configOutput(OUTSQR_OUTPUT, "pwm square");
-        SAWosc.Init(APP->engine->getSampleRate());
-        SQRosc.Init(APP->engine->getSampleRate());
-        SAWosc.SetWaveshape(0);
-        SQRosc.SetWaveshape(1);
+        for (int i = 0; i < 4; i++) {
+            SAWosc[i].Init(APP->engine->getSampleRate());
+            SQRosc[i].Init(APP->engine->getSampleRate());
+            SAWosc[i].SetWaveshape(0);
+            SQRosc[i].SetWaveshape(1);
+        }
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -42,12 +44,14 @@ struct VarTriSaw : Module {
         outputs[OUTSAW_OUTPUT].setChannels(channels);
         outputs[OUTSQR_OUTPUT].setChannels(channels);
         for(int i = 0; i < channels; i++) {
-            SAWosc.SetFreq(dsp::FREQ_C4 * powf(2.f, inputs[VOCT_INPUT].getPolyVoltage(std::min(OCTchannels, i))));
-            SAWosc.SetPW(inputs[AFTIN_INPUT].getPolyVoltage(std::min(AFTchannels, i)) / 10.f + 5.f);
-            SQRosc.SetFreq(dsp::FREQ_C4 * powf(2.f, inputs[VOCT_INPUT].getPolyVoltage(std::min(OCTchannels, i))));
-            SQRosc.SetPW(inputs[AFTIN_INPUT].getPolyVoltage(std::min(AFTchannels, i)) / 10.f);
-            outputs[OUTSAW_OUTPUT].setVoltage(SAWosc.Process(), i);
-            outputs[OUTSQR_OUTPUT].setVoltage(SQRosc.Process(), i);
+            float freq = dsp::FREQ_C4 * powf(2.f, inputs[VOCT_INPUT].getPolyVoltage(std::min(OCTchannels, i)));
+            float pw = inputs[AFTIN_INPUT].getPolyVoltage(std::min(AFTchannels, i)) / 10.f;
+            SAWosc[i].SetFreq(freq);
+            SAWosc[i].SetPW(pw);
+            SQRosc[i].SetFreq(freq);
+            SQRosc[i].SetPW(pw);
+            outputs[OUTSAW_OUTPUT].setVoltage(SAWosc[i].Process(), i);
+            outputs[OUTSQR_OUTPUT].setVoltage(SQRosc[i].Process(), i);
         }
 	}
 };

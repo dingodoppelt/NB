@@ -29,11 +29,11 @@ struct Polyfotz : Module {
 	};
 
 	float freq = 440.f;
-	float tune, aftertouch, bendfactor, transp, spread, pitchwheel = 0.f;
+	float tune, aft_raw, bendfactor, transp, spread, pitchwheel = 0.f;
 	float bendrange = 2.f;
 	float octave = 1.f;
 	int voicing_select = 0;
-    float aft_amt[4] = { 0.2f, -0.4f, 0.6f, -0.9f };
+    float aft_amt[4] = { -1.f, 2.f, -3.f, 4.f };
     float detune_amt[4] = { 0.f, -0.1f / 12.f, 0.1f / 12.f, -0.2f / 12.f };
 	int voicing[10][4] = { {0, -5, -10, -12},
 							{0, -5, -10, -20},
@@ -53,7 +53,7 @@ struct Polyfotz : Module {
 		configParam(DETUNE_PARAM, 0.f, 1.f, 0.f, "detune spread");
 		configParam(OCT_SEL_CV_PARAM, -2.f, 2.f, 0.f, "transpose by octave");
 		configParam(VOICING_SEL_PARAM, 0.f, 9.f, 0.f, "voicing selection");
-		configParam(AFT_RAND_PARAM, -1.f, 1.f, 0.f, "aftertouch randomization");
+		configParam(AFT_RAND_PARAM, 0.f, 1.f, .5f, "aftertouch randomization");
 		configInput(CVIN_INPUT, "V/OCT");
 		configInput(OCTCVIN_INPUT, "toggle transpose by octave");
 		configInput(PW_CV_INPUT, "pitchwheel");
@@ -65,7 +65,7 @@ struct Polyfotz : Module {
 
 	void process(const ProcessArgs& args) override {
 		tune = params[TUNE_PARAM].getValue();
-		aftertouch = inputs[AFTCV_INPUT].isConnected() ? inputs[AFTCV_INPUT].getVoltage() / 2.f : params[AFT_RAND_PARAM].getValue();
+        aft_raw = inputs[AFTCV_INPUT].isConnected() ? inputs[AFTCV_INPUT].getVoltage() / 10.f : 1.f;
 		octave = inputs[OCTCVIN_INPUT].isConnected() ? params[OCT_SEL_CV_PARAM].getValue() * (int)(inputs[OCTCVIN_INPUT].getVoltage() / 10.f) : params[OCT_SEL_CV_PARAM].getValue();
         pitchwheel = inputs[PW_CV_INPUT].getVoltage() / 5.f;
 		bendfactor = (pitchwheel * bendrange) / 12.f;
@@ -77,7 +77,7 @@ struct Polyfotz : Module {
         outputs[AFT_OUT_OUTPUT].setChannels(4);
 		for (int i = 0; i < 4; i++) {
 			outputs[POLY_OUT_OUTPUT].setVoltage(freq + (detune_amt[i] * spread) + (bendfactor < 0.f ? (float)voicing[voicing_select][i] / -12.f * pitchwheel : bendfactor), i);
-            outputs[AFT_OUT_OUTPUT].setVoltage(aftertouch * aft_amt[i], i);
+            outputs[AFT_OUT_OUTPUT].setVoltage(5.f + aft_amt[i] * aft_raw, i);
         }
 	}
 };
