@@ -29,7 +29,7 @@ struct Polyfotz : Module {
 	};
 
 	float freq = 440.f;
-	float tune, aft_raw, bendfactor, transp, spread, pitchwheel = 0.f;
+	float tune, aft_param, aft_raw, bendfactor, transp, spread, pitchwheel = 0.f;
 	float bendrange = 2.f;
 	float octave = 1.f;
 	int voicing_select = 0;
@@ -65,7 +65,8 @@ struct Polyfotz : Module {
 
 	void process(const ProcessArgs& args) override {
 		tune = params[TUNE_PARAM].getValue();
-        aft_raw = inputs[AFTCV_INPUT].isConnected() ? inputs[AFTCV_INPUT].getVoltage() / 10.f : 1.f;
+        aft_raw = inputs[AFTCV_INPUT].isConnected() ? inputs[AFTCV_INPUT].getVoltage() : 10.f;
+        aft_param = params[AFT_RAND_PARAM].getValue();
 		octave = inputs[OCTCVIN_INPUT].isConnected() ? params[OCT_SEL_CV_PARAM].getValue() * (int)(inputs[OCTCVIN_INPUT].getVoltage() / 10.f) : params[OCT_SEL_CV_PARAM].getValue();
         pitchwheel = inputs[PW_CV_INPUT].getVoltage() / 5.f;
 		bendfactor = (pitchwheel * bendrange) / 12.f;
@@ -76,8 +77,10 @@ struct Polyfotz : Module {
         outputs[POLY_OUT_OUTPUT].setChannels(4);
         outputs[AFT_OUT_OUTPUT].setChannels(4);
 		for (int i = 0; i < 4; i++) {
-			outputs[POLY_OUT_OUTPUT].setVoltage(freq + (detune_amt[i] * spread) + (bendfactor < 0.f ? (float)voicing[voicing_select][i] / -12.f * pitchwheel : bendfactor), i);
-            outputs[AFT_OUT_OUTPUT].setVoltage(5.f + aft_amt[i] * aft_raw, i);
+            float aftVolt = (aft_raw + aft_amt[i] * (aft_raw / 10.f) * aft_param);
+            float polyVolt = freq + (detune_amt[i] * spread) + (bendfactor < 0.f ? (float)voicing[voicing_select][i] / -12.f * pitchwheel : bendfactor);
+			outputs[POLY_OUT_OUTPUT].setVoltage(polyVolt, i);
+            outputs[AFT_OUT_OUTPUT].setVoltage(clamp(5.f + (aftVolt - 5.f), 0.f, 10.f), i);
         }
 	}
 };
