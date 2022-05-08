@@ -43,8 +43,9 @@ struct SimpleStereoEcho : Module {
 	};
 
     int SR = APP->engine->getSampleRate();
-	rack::dsp::RingBuffer<float, 240000> delayBufferL;
-	rack::dsp::RingBuffer<float, 240000> delayBufferR;
+    float oneMS = (float)SR / 1000.f;
+    rack::dsp::RingBuffer<float, 65536> delayBufferL[16];
+    rack::dsp::RingBuffer<float, 65536> delayBufferR[16];
     float fdbkL, fdbkR, timeL, timeR, mix, in, left, right = 0.f;
 
 	SimpleStereoEcho() {
@@ -62,29 +63,32 @@ struct SimpleStereoEcho : Module {
 
 	void process(const ProcessArgs& args) override {
         if (outputs[OUTL_OUTPUT].isConnected() || outputs[OUTR_OUTPUT].isConnected()) {
+            int channels = inputs[INPUTM_INPUT].getChannels();
             mix = inputs[MIXCV_INPUT].isConnected() ? (inputs[MIXCV_INPUT].getVoltage() / 10.f) : params[MIX_PARAM].getValue();
-            in = inputs[INPUTM_INPUT].getVoltage();
-            if (mix > 0) {
-                timeL = params[TIMEL_PARAM].getValue() * (SR / 1000);
-                timeR = params[TIMER_PARAM].getValue() * (SR / 1000);
-                fdbkL = params[FDBKL_PARAM].getValue();
-                fdbkR = params[FDBKR_PARAM].getValue();
-                delayBufferL.end = delayBufferL.start + timeL;
-                delayBufferR.end = delayBufferR.start + timeR;
-                left = delayBufferL.shift();
-                right = delayBufferR.shift();
-                delayBufferL.push(in + (fdbkL * left));
-                delayBufferR.push(in + (fdbkR * right));
-            } else {
-                left = right = 0.f;
+            timeL = params[TIMEL_PARAM].getValue() * oneMS;
+            timeR = params[TIMER_PARAM].getValue() * oneMS;
+            fdbkL = params[FDBKL_PARAM].getValue();
+            fdbkR = params[FDBKR_PARAM].getValue();
+            outputs[OUTL_OUTPUT].setChannels(channels);
+            outputs[OUTR_OUTPUT].setChannels(channels);
+            for (int i = 0; i < channels; i++) {
+                in = inputs[INPUTM_INPUT].getPolyVoltage(i);
+                if (mix > 0) {
+                    delayBufferL[i].end = delayBufferL[i].start + timeL;
+                    delayBufferR[i].end = delayBufferR[i].start + timeR;
+                    left = delayBufferL[i].shift();
+                    right = delayBufferR[i].shift();
+                    delayBufferL[i].push(in + (fdbkL * left));
+                    delayBufferR[i].push(in + (fdbkR * right));
+                } else {
+                    left = right = 0.f;
+                }
+            outputs[OUTL_OUTPUT].setVoltage(in + (mix * left), i);
+            outputs[OUTR_OUTPUT].setVoltage(in + (mix * right), i);
             }
-            outputs[OUTL_OUTPUT].setVoltage(in + (mix * left));
-            outputs[OUTR_OUTPUT].setVoltage(in + (mix * right));
         }
-	}
+    };
 };
-
-
 
 struct SimpleStereoEchoWidget : ModuleWidget {
 	SimpleStereoEchoWidget(SimpleStereoEcho* module) {
@@ -109,6 +113,5 @@ struct SimpleStereoEchoWidget : ModuleWidget {
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(32.694, 112.372)), module, SimpleStereoEcho::OUTR_OUTPUT));
 	}
 };
-
 
 Model* modelSimpleStereoEcho = createModel<SimpleStereoEcho, SimpleStereoEchoWidget>("simpleStereoEcho");
