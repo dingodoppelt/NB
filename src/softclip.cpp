@@ -17,6 +17,7 @@ struct Softclip : Module {
 	};
 	enum OutputId {
 		OUTPUT_OUTPUT,
+		MIXOUT_OUTPUT,
 		OUTPUTS_LEN
 	};
 	enum LightId {
@@ -33,6 +34,8 @@ struct Softclip : Module {
 		configInput(HARDNCVIN_INPUT, "hardness-cv input");
 		configInput(INPUT_INPUT, "input");
 		configOutput(OUTPUT_OUTPUT, "output");
+		configOutput(MIXOUT_OUTPUT, "mixoutput");
+        outputs[MIXOUT_OUTPUT].setChannels(1);
 	}
 	
 	float saturate(float inValue, float hardness) {
@@ -42,8 +45,10 @@ struct Softclip : Module {
     }
 
 	void process(const ProcessArgs& args) override {
-        if (inputs[INPUT_INPUT].isConnected() && outputs[OUTPUT_OUTPUT].isConnected()) {
-            float inputNormalized = inputs[INPUT_INPUT].getVoltage() / 5.f;
+        if (inputs[INPUT_INPUT].isConnected() && (outputs[OUTPUT_OUTPUT].isConnected() || outputs[MIXOUT_OUTPUT].isConnected())) {
+            float mix = 0.f;
+            int channels = inputs[INPUT_INPUT].getChannels();
+            outputs[OUTPUT_OUTPUT].setChannels(channels);
             float gain = powf(8, params[GAIN_PARAM].getValue());
             float hardness = params[HARDN_PARAM].getValue();
             if (inputs[GAINCVIN_INPUT].isConnected()) {
@@ -52,7 +57,12 @@ struct Softclip : Module {
             if (inputs[HARDNCVIN_INPUT].isConnected()) {
                 hardness *= params[HARDNCVAMT_PARAM].getValue() * (inputs[HARDNCVIN_INPUT].getVoltage() / 10);
             }
-            outputs[OUTPUT_OUTPUT].setVoltage(5.f * saturate(gain * inputNormalized, hardness));
+            for (int i=0; i < channels; i++) {
+                float in = inputs[INPUT_INPUT].getPolyVoltage(i);
+                mix += gain * in / channels;
+                outputs[OUTPUT_OUTPUT].setVoltage(5.f * saturate(gain * in, hardness), i);
+            }
+            outputs[MIXOUT_OUTPUT].setVoltage(saturate(mix, hardness));
         }
 	}
 };
@@ -78,6 +88,7 @@ struct SoftclipWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(9.901, 107.067)), module, Softclip::INPUT_INPUT));
 
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(30.739, 107.067)), module, Softclip::OUTPUT_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(30.739, 120.067)), module, Softclip::MIXOUT_OUTPUT));
 	}
 };
 

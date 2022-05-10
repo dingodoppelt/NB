@@ -50,8 +50,8 @@ struct VarTriSaw : Module {
             SAWosc[i].SetPW(pw);
             SQRosc[i].SetFreq(freq);
             SQRosc[i].SetPW(pw);
-            outputs[OUTSAW_OUTPUT].setVoltage(SAWosc[i].Process(), i);
-            outputs[OUTSQR_OUTPUT].setVoltage(SQRosc[i].Process(), i);
+            outputs[OUTSAW_OUTPUT].setVoltage(SAWosc[i].Process() * 10.f, i);
+            outputs[OUTSQR_OUTPUT].setVoltage(SQRosc[i].Process() * 10.f, i);
         }
 	}
 };
