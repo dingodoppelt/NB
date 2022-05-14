@@ -33,7 +33,7 @@ struct Polyfotz : Module {
 	float bendrange = 2.f;
 	float octave = 1.f;
 	int voicing_select = 0;
-    float aft_amt[4] = { -1.f, 2.f, -3.f, 4.f };
+    float aft_amt[4] = { .6f, .3f, .7f, .8f };
     float detune_amt[4] = { 0.f, -0.1f / 12.f, 0.1f / 12.f, -0.2f / 12.f };
 	int voicing[10][4] = { {0, -5, -10, -12},
 							{0, -5, -10, -20},
@@ -77,10 +77,10 @@ struct Polyfotz : Module {
         outputs[POLY_OUT_OUTPUT].setChannels(4);
         outputs[AFT_OUT_OUTPUT].setChannels(4);
 		for (int i = 0; i < 4; i++) {
-            float aftVolt = (aft_raw + aft_amt[i] * (aft_raw / 10.f) * aft_param);
+            float aftVolt = (aft_raw * powf(aft_amt[i], aft_param));
             float polyVolt = freq + (detune_amt[i] * spread) + (bendfactor < 0.f ? (float)voicing[voicing_select][i] / -12.f * pitchwheel : bendfactor);
 			outputs[POLY_OUT_OUTPUT].setVoltage(polyVolt, i);
-            outputs[AFT_OUT_OUTPUT].setVoltage(clamp(5.f + (aftVolt - 5.f), 0.f, 10.f), i);
+            outputs[AFT_OUT_OUTPUT].setVoltage(aftVolt, i);
         }
 	}
 };
