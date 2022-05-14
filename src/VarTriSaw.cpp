@@ -22,6 +22,7 @@ struct VarTriSaw : Module {
 	};
 
     VariableShapeOscillator SQRosc[4], SAWosc[4];
+    float aft_amt[4] = { .6f, .3f, .7f, .8f };
 
 	VarTriSaw() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -49,7 +50,7 @@ struct VarTriSaw : Module {
             SAWosc[i].SetFreq(freq);
             SAWosc[i].SetPW(pw);
             SQRosc[i].SetFreq(freq);
-            SQRosc[i].SetPW(pw);
+            SQRosc[i].SetPW(pw * aft_amt[i % 4]);
             outputs[OUTSAW_OUTPUT].setVoltage(SAWosc[i].Process() * 10.f, i);
             outputs[OUTSQR_OUTPUT].setVoltage(SQRosc[i].Process() * 10.f, i);
         }
