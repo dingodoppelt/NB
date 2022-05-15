@@ -60,9 +60,9 @@ struct Softclip : Module {
             for (int i=0; i < channels; i++) {
                 float in = inputs[INPUT_INPUT].getPolyVoltage(i);
                 mix += gain * in / channels;
-                outputs[OUTPUT_OUTPUT].setVoltage(5.f * saturate(gain * in, hardness), i);
+                outputs[OUTPUT_OUTPUT].setVoltage(10.f * saturate(gain * in, hardness), i);
             }
-            outputs[MIXOUT_OUTPUT].setVoltage(saturate(mix, hardness));
+            outputs[MIXOUT_OUTPUT].setVoltage(10.f * saturate(mix, hardness));
         }
 	}
 };
