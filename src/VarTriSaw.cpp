@@ -1,5 +1,6 @@
 #include "plugin.hpp"
 #include "variableshapeosc.h"
+#define MAX_POLYPHONY 4
 
 using namespace daisysp;
 
@@ -21,8 +22,8 @@ struct VarTriSaw : Module {
 		LIGHTS_LEN
 	};
 
-	VariableShapeOscillator SQRosc[4], SAWosc[4];
-	float aft_amt[4] = { .6f, .3f, .7f, .8f };
+	VariableShapeOscillator SQRosc[MAX_POLYPHONY], SAWosc[MAX_POLYPHONY];
+	float aft_amt[MAX_POLYPHONY];
 
 	VarTriSaw() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -30,11 +31,12 @@ struct VarTriSaw : Module {
 		configInput(AFTIN_INPUT, "aftertouch");
 		configOutput(OUTSAW_OUTPUT, "pwm triSaw");
 		configOutput(OUTSQR_OUTPUT, "pwm square");
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < MAX_POLYPHONY; i++) {
 			SAWosc[i].Init(APP->engine->getSampleRate());
 			SQRosc[i].Init(APP->engine->getSampleRate());
 			SAWosc[i].SetWaveshape(0);
 			SQRosc[i].SetWaveshape(1);
+			aft_amt[i] = sin(i * std::atan(1) * 2); // atan(1) = pi / 2 so we get values between 0 and 1
 		}
 	}
 
