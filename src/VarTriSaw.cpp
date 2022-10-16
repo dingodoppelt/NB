@@ -26,6 +26,7 @@ struct VarTriSaw : Module {
 	float aft_amt[MAX_POLYPHONY];
 
 	VarTriSaw() {
+		float pi_halves = std::atan(1) * 2;
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configInput(VOCT_INPUT, "v/oct");
 		configInput(AFTIN_INPUT, "aftertouch");
@@ -36,7 +37,7 @@ struct VarTriSaw : Module {
 			SQRosc[i].Init(APP->engine->getSampleRate());
 			SAWosc[i].SetWaveshape(0);
 			SQRosc[i].SetWaveshape(1);
-			aft_amt[i] = sin(i * std::atan(1) * 2); // atan(1) = pi / 2 so we get values between 0 and 1
+			aft_amt[i] = sin(pi_halves * i / MAX_POLYPHONY); // atan(1) = pi / 4 so we get values between 0 and 1
 		}
 	}
 
@@ -50,9 +51,9 @@ struct VarTriSaw : Module {
 			float freq = dsp::FREQ_C4 * powf(2.f, inputs[VOCT_INPUT].getPolyVoltage(std::min(OCTchannels, i)));
 			float pw = inputs[AFTIN_INPUT].getPolyVoltage(std::min(AFTchannels, i)) / 10.f;
 			SAWosc[i].SetFreq(freq);
-			SAWosc[i].SetPW(pw);
+			SAWosc[i].SetPW((pw + 1.f) / 2.f);
 			SQRosc[i].SetFreq(freq);
-			SQRosc[i].SetPW(pw * aft_amt[i % 4]);
+			SQRosc[i].SetPW( (pw * aft_amt[i] + 1.f) / 2.f );
 			outputs[OUTSAW_OUTPUT].setVoltage(SAWosc[i].Process() * 10.f, i);
 			outputs[OUTSQR_OUTPUT].setVoltage(SQRosc[i].Process() * 10.f, i);
 		}
