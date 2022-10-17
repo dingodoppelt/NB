@@ -21,6 +21,7 @@ struct Polyfotz : Module {
 	};
 	enum OutputId {
 		AFT_OUT_OUTPUT,
+		GAIN_OUT_OUTPUT,
 		POLY_OUT_OUTPUT,
 		OUTPUTS_LEN
 	};
@@ -62,6 +63,7 @@ struct Polyfotz : Module {
 		configInput(AFTCV_INPUT, "aftertouch");
 		configOutput(POLY_OUT_OUTPUT, "polyphonic");
 		configOutput(AFT_OUT_OUTPUT, "polyphonic aftertouch");
+		configOutput(GAIN_OUT_OUTPUT, "polyphonic gain");
 	}
 
 	void process(const ProcessArgs& args) override {
@@ -77,11 +79,13 @@ struct Polyfotz : Module {
 		voicing_select = inputs[VOICINGCV_INPUT].isConnected() ? ((int)abs(inputs[VOICINGCV_INPUT].getVoltage()) % (int)paramQuantities[VOICING_SEL_PARAM]->getMaxValue()) : (int)(params[VOICING_SEL_PARAM].getValue());
 		outputs[POLY_OUT_OUTPUT].setChannels(4);
 		outputs[AFT_OUT_OUTPUT].setChannels(4);
+		outputs[GAIN_OUT_OUTPUT].setChannels(4);
 		for (int i = 0; i < 4; i++) {
 			float aftVolt = (aft_raw * powf(aft_amt[i], aft_param));
 			float polyVolt = freq + (detune_amt[i] * spread) + (bendfactor < 0.f ? (float)voicing[voicing_select][i] / -12.f * pitchwheel : bendfactor);
 			outputs[POLY_OUT_OUTPUT].setVoltage(polyVolt, i);
 			outputs[AFT_OUT_OUTPUT].setVoltage(aftVolt, i);
+			outputs[GAIN_OUT_OUTPUT].setVoltage(10 - 2 * i, i);
 		}
 	}
 };
@@ -111,6 +115,7 @@ struct PolyfotzWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(8.712, 101.311)), module, Polyfotz::VOICINGCV_INPUT));
 
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(32.744, 73.538)), module, Polyfotz::AFT_OUT_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(36.218, 101.709)), module, Polyfotz::GAIN_OUT_OUTPUT));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(30.829, 112.63)), module, Polyfotz::POLY_OUT_OUTPUT));
 	}
 };
