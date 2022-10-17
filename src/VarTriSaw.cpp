@@ -56,13 +56,13 @@ struct VarTriSaw : Module {
 		for(int i = 0; i < channels; i++) {
 			float freq = dsp::FREQ_C4 * powf(2.f, inputs[VOCT_INPUT].getPolyVoltage(std::min(OCTchannels, i)));
 			float pw = inputs[AFTIN_INPUT].getPolyVoltage(std::min(AFTchannels, i)) / 10.f;
-			gain = inputs[GAININ_INPUT].isConnected() ? inputs[GAININ_INPUT].getPolyVoltage(std::min(GAINchannels, i)) / 10.f : params[GAINPARAM_PARAM].getValue();
+			gain = inputs[GAININ_INPUT].isConnected() ? 11.f - powf(10.f - inputs[GAININ_INPUT].getPolyVoltage(std::min(GAINchannels, i) + 1.f), params[GAINPARAM_PARAM].getValue()) : 10.f;
 			SAWosc[i].SetFreq(freq);
 			SAWosc[i].SetPW((pw + 1.f) / 2.f);
 			SQRosc[i].SetFreq(freq);
 			SQRosc[i].SetPW( (pw * aft_amt[i] + 1.f) / 2.f );
-			outputs[OUTSAW_OUTPUT].setVoltage(SAWosc[i].Process() * gain * 10.f, i);
-			outputs[OUTSQR_OUTPUT].setVoltage(SQRosc[i].Process() * gain * 10.f, i);
+			outputs[OUTSAW_OUTPUT].setVoltage(SAWosc[i].Process() * gain, i);
+			outputs[OUTSQR_OUTPUT].setVoltage(SQRosc[i].Process() * gain, i);
 		}
 	}
 };
