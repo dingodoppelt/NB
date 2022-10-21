@@ -36,7 +36,7 @@ struct Polyfotz : Module {
 	int voicing_select = 0;
 	float aft_amt[4] = { .6f, .3f, .7f, .8f };
 	float detune_amt[4] = { 0.f, -0.1f / 12.f, 0.1f / 12.f, -0.2f / 12.f };
-	int voicing[10][4] = { {0, -5, -10, -12},
+	std::vector<std::vector<int>> voicings = { {0, -5, -10, -12},
 							{0, -5, -10, -20},
 							{0, -3, -8, -19},
 							{0, -3, -7, -10},
@@ -54,7 +54,7 @@ struct Polyfotz : Module {
 		configParam(TUNE_PARAM, -0.1f, 0.1f, 0.f, "fine tune");
 		configParam(DETUNE_PARAM, 0.f, 1.f, 0.f, "detune spread");
 		configParam(OCT_SEL_CV_PARAM, -2.f, 2.f, 0.f, "transpose by octave");
-		configParam(VOICING_SEL_PARAM, 0.f, float(sizeof(voicing)/sizeof(*voicing) - 1), 0.f, "voicing selection");
+		configParam(VOICING_SEL_PARAM, 0.f, 12.f, 0.f, "voicing selection");
 		configParam(AFT_RAND_PARAM, 0.f, 1.f, .5f, "aftertouch randomization");
 		configInput(CVIN_INPUT, "V/OCT");
 		configInput(OCTCVIN_INPUT, "toggle transpose by octave");
@@ -76,16 +76,33 @@ struct Polyfotz : Module {
 		transp = params[TRANSP_PARAM].getValue() / 12.f;
 		spread = params[DETUNE_PARAM].getValue() / .9f + .1f;
 		freq = inputs[CVIN_INPUT].getVoltage() + octave + transp + tune;
-		voicing_select = inputs[VOICINGCV_INPUT].isConnected() ? ((int)abs(inputs[VOICINGCV_INPUT].getVoltage()) % (int)paramQuantities[VOICING_SEL_PARAM]->getMaxValue()) : (int)(params[VOICING_SEL_PARAM].getValue());
-		outputs[POLY_OUT_OUTPUT].setChannels(4);
-		outputs[AFT_OUT_OUTPUT].setChannels(4);
-		outputs[GAIN_OUT_OUTPUT].setChannels(4);
-		for (int i = 0; i < 4; i++) {
-			float aftVolt = (aft_raw * powf(aft_amt[i], aft_param));
-			float polyVolt = freq + (detune_amt[i] * spread) + (bendfactor < 0.f ? (float)voicing[voicing_select][i] / -12.f * pitchwheel : bendfactor);
+		voicing_select = inputs[VOICINGCV_INPUT].isConnected() ? ((int)abs(floor(inputs[VOICINGCV_INPUT].getVoltage())) % voicings.size()) : (int)(params[VOICING_SEL_PARAM].getValue()) % voicings.size();
+		int channels = bendfactor < 0.f ? voicings[voicing_select].size() : 4;
+		outputs[POLY_OUT_OUTPUT].setChannels(channels);
+		outputs[AFT_OUT_OUTPUT].setChannels(channels);
+		outputs[GAIN_OUT_OUTPUT].setChannels(channels);
+		for (int i = 0; i < channels; i++) {
+			float aftVolt = (aft_raw * powf(aft_amt[i % 3], aft_param));
+			float polyVolt = freq + (detune_amt[i % 3] * spread) + (bendfactor < 0.f ? (float)voicings[voicing_select][i] / -12.f * pitchwheel : bendfactor);
 			outputs[POLY_OUT_OUTPUT].setVoltage(polyVolt, i);
 			outputs[AFT_OUT_OUTPUT].setVoltage(aftVolt, i);
-			outputs[GAIN_OUT_OUTPUT].setVoltage(10 - 2 * i, i);
+			outputs[GAIN_OUT_OUTPUT].setVoltage(10.f - (float)i / (float)channels * 10.f, i);
+		}
+	}
+
+	void dataFromJson(json_t* rootJ) override {
+		json_t* voicingsJ = json_object_get(rootJ, "voicings");
+		if (voicingsJ) {
+			voicings.resize(json_array_size(voicingsJ));
+			for (int i = 0; i < voicings.size(); i++) {
+				json_t* voicingJ = json_array_get(voicingsJ, i);
+				if (voicingJ) {
+					voicings[i].resize(json_array_size(voicingJ));
+					for (int j = 0; j < voicings[i].size(); j++) {
+						voicings[i][j] = json_integer_value(json_array_get(voicingJ, j));
+					}
+				}
+			}
 		}
 	}
 };

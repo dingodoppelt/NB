@@ -1,6 +1,6 @@
 #include "plugin.hpp"
 #include "variableshapeosc.h"
-#define MAX_POLYPHONY 4
+#define MAX_POLYPHONY 16
 
 using namespace daisysp;
 
