@@ -1,0 +1,12 @@
+{
+  "plugin": "NB",
+  "model": "Polyfotz",
+  "version": "2.0.0",
+  "params": [],
+  "data": {
+    "voicings": [
+      [0, -5, -7, -8, -15],
+      [0, -5, -7, -9, -16]
+    ]
+  }
+}
