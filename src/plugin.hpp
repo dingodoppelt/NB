@@ -9,10 +9,7 @@ extern Plugin* pluginInstance;
 
 // Declare each Model, defined in each module source file
 // extern Model* modelMyModule;
-extern Model* modelSimpleStereoEcho;
-extern Model* modelSimpleOSCvarSaw;
 extern Model* modelSoftclip;
-extern Model* modelVarShapeOSC;
 extern Model* modelMoggle;
 extern Model* modelPolyfotz;
 extern Model* modelVarTriSaw;

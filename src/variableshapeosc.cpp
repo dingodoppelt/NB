@@ -143,7 +143,7 @@ void VariableShapeOscillator::SetPW(float pw)
     else
     {
         pw_ = fclamp(
-            pw, slave_frequency_ * 2.0f, 1.0f - 2.0f * slave_frequency_);
+            pw, slave_frequency_ * .5f, 1.0f - .5f * slave_frequency_);
     }
 }
 

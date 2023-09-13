@@ -14,25 +14,6 @@
   "changelogUrl": "",
   "modules": [
     {
-      "slug": "simpleOSCvarSaw",
-      "name": "simpleOSCvarSaw",
-      "description": "osc with morphing waveform (tri-saw)",
-      "tags": [
-        "Oscillator"
-      ]
-    },
-    {
-      "slug": "simpleStereoEcho",
-      "name": "simpleStereoEcho",
-      "description": "simple stereo echo",
-      "tags": [
-        "Delay",
-        "Digital",
-        "Effect",
-        "Polyphonic"
-      ]
-    },
-    {
       "slug": "softclip",
       "name": "softclip",
       "description": "soft tanh clipping with hardness control",
@@ -40,14 +21,6 @@
         "Waveshaper",
         "Distortion",
         "Effect"
-      ]
-    },
-    {
-      "slug": "varShapeOSC",
-      "name": "varShapeOSC",
-      "description": "variable shape oscillator",
-      "tags": [
-        "Oscillator"
       ]
     },
     {

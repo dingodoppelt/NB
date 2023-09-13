@@ -9,10 +9,7 @@ void init(Plugin* p) {
 
 	// Add modules here
 	// p->addModel(modelMyModule);
-    p->addModel(modelSimpleStereoEcho);
-    p->addModel(modelSimpleOSCvarSaw);
     p->addModel(modelSoftclip);
-    p->addModel(modelVarShapeOSC);
     p->addModel(modelMoggle);
     p->addModel(modelPolyfotz);
     p->addModel(modelVarTriSaw);
