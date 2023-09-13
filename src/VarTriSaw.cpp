@@ -2,8 +2,6 @@
 #include "variableshapeosc.h"
 #define MAX_POLYPHONY 16
 
-using namespace daisysp;
-
 struct VarTriSaw : Module {
 	enum ParamId {
 		GAINPARAM_PARAM,
